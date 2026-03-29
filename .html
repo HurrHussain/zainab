@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Zainab Khan 🌸</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink-bg: #fdf2f8;
+            --pink-text: #db2777;
+            --purple-text: #4c1d95;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100vw; height: 100vh;
+            background-color: var(--pink-bg);
+            font-family: 'Poppins', sans-serif;
+            overflow: hidden;
+        }
+
+        /* ── INTRO SCREEN ── */
+        #intro-screen {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            transition: opacity 0.8s ease;
+        }
+
+        .text-wall {
+            width: 80%;
+            max-width: 700px;
+            background: rgba(255,255,255,0.75);
+            backdrop-filter: blur(12px);
+            padding: 50px;
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.9);
+            box-shadow: 0 25px 50px rgba(190,24,93,0.1);
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: var(--pink-text);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            margin: 0 0 20px;
+            font-style: italic;
+        }
+        p { color: var(--purple-text); font-size: 1.05rem; line-height: 1.8; margin-bottom: 16px; }
+
+        .btn {
+            background: var(--pink-text); color: white; border: none;
+            padding: 14px 34px; font-size: 1rem; border-radius: 50px;
+            cursor: pointer; font-family: 'Poppins', sans-serif;
+            box-shadow: 0 10px 20px rgba(190,24,93,0.25);
+            transition: transform 0.2s, background 0.2s;
+        }
+        .btn:hover { transform: scale(1.05); background: #9d174d; }
+
+        /* ── GALLERY ── */
+        #gallery-screen {
+            position: fixed;
+            inset: 0;
+            display: none;
+            z-index: 100;
+        }
+
+        /* Visual 3D layer — pointer-events OFF so it never blocks clicks */
+        #gallery-3d {
+            position: absolute;
+            inset: 0;
+            perspective: 1000px;
+            pointer-events: none;
+        }
+
+        #gallery-inner {
+            position: absolute;
+            inset: 0;
+            transform-style: preserve-3d;
+        }
+
+        .scene-card {
+            position: absolute;
+            top: 50%; left: 50%;
+        }
+
+        .scene-img {
+            width: 230px;
+            height: 320px;
+            object-fit: cover;
+            border-radius: 14px;
+            border: 6px solid white;
+            box-shadow: 0 20px 40px rgba(190,24,93,0.2);
+            background: #fbcfe8;
+            display: block;
+        }
+
+        /* Flat click-target overlay */
+        #gallery-hits {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .hit-zone {
+            position: absolute;
+            cursor: pointer;
+            pointer-events: auto;
+            border-radius: 14px;
+            border: 4px solid transparent;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+        .hit-zone:hover {
+            border-color: var(--pink-text);
+            box-shadow: 0 0 0 4px rgba(219,39,119,0.15);
+        }
+        .hit-zone::after {
+            content: '🔍';
+            position: absolute;
+            bottom: 12px; right: 12px;
+            background: rgba(255,255,255,0.92);
+            border-radius: 50%;
+            width: 36px; height: 36px;
+            font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+            line-height: 36px; text-align: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .hit-zone:hover::after { opacity: 1; }
+
+        .bird {
+            position: absolute;
+            font-size: 3.5rem;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        #nav-back-btn {
+            position: absolute; top: 28px; left: 28px;
+            background: white; color: var(--pink-text);
+            border: 2px solid var(--pink-text);
+            padding: 10px 24px; border-radius: 30px;
+            font-weight: 600; cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            pointer-events: auto;
+            z-index: 10;
+            transition: background 0.2s, color 0.2s;
+        }
+        #nav-back-btn:hover { background: var(--pink-text); color: white; }
+
+        /* ── MODAL ── */
+        #photo-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(253,242,248,0.97);
+            backdrop-filter: blur(18px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+        #photo-modal.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #modal-img {
+            max-width: 88vw;
+            max-height: 72vh;
+            object-fit: contain;
+            border-radius: 20px;
+            border: 8px solid white;
+            box-shadow: 0 30px 80px rgba(190,24,93,0.3);
+            margin-bottom: 28px;
+            transform: scale(0.93);
+            transition: transform 0.4s cubic-bezier(0.25,1,0.2,1);
+        }
+        #photo-modal.open #modal-img { transform: scale(1); }
+
+        #modal-placeholder {
+            width: 300px; height: 380px;
+            background: #fbcfe8;
+            border-radius: 20px;
+            border: 8px solid white;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 28px;
+            text-align: center;
+            padding: 24px;
+            display: none;
+        }
+        #modal-placeholder span { font-size: 3rem; }
+        #modal-placeholder p { color: var(--pink-text); font-size: 0.9rem; margin-top: 12px; }
+
+        .close-btn {
+            background: white; color: var(--pink-text);
+            border: 2px solid var(--pink-text);
+            padding: 12px 30px; border-radius: 50px;
+            font-size: 1rem; font-family: 'Poppins', sans-serif;
+            font-weight: 600; cursor: pointer;
+            transition: background 0.2s, color 0.2s, transform 0.2s;
+        }
+        .close-btn:hover { background: var(--pink-text); color: white; transform: scale(1.05); }
+        #modal-hint { font-size: 0.8rem; color: var(--pink-text); opacity: 0.4; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro-screen">
+    <div class="text-wall">
+        <h1>For Zainab Khan 🌸</h1>
+        <p>
+            It's hard to believe it has already been 4 years since we became friends.
+            We have been through so much together, navigating all the highs, the lows,
+            and the absolute chaos in between. Through it all, you have been a constant.
+        </p>
+        <p>
+            From our longest conversations to just watching the street pigeons do their thing,
+            I appreciate every single memory we've made. You deserve the absolute best,
+            today and always. Thank you for being such a brilliant friend.
+        </p>
+        <p style="text-align:right; font-weight:600; color:var(--pink-text); margin-bottom:0;">— Hurr</p>
+        <button class="btn" onclick="enterGallery()">Step Inside ✨</button>
+    </div>
+</div>
+
+<!-- GALLERY -->
+<div id="gallery-screen">
+
+    <!-- Visual-only 3D layer (no pointer events) -->
+    <div id="gallery-3d">
+        <div id="gallery-inner">
+            <div class="scene-card" id="card1"><img class="scene-img" id="img1" alt=""></div>
+            <div class="scene-card" id="card2"><img class="scene-img" id="img2" alt=""></div>
+            <div class="scene-card" id="card3"><img class="scene-img" id="img3" alt=""></div>
+
+            <div class="scene-card bird" id="bird1">🕊️</div>
+            <div class="scene-card bird" id="bird2">🐦</div>
+            <div class="scene-card bird" id="bird3">🕊️</div>
+        </div>
+    </div>
+
+    <!-- Flat invisible hit zones positioned over each image -->
+    <div id="gallery-hits">
+        <div class="hit-zone" id="hit1" onclick="openModal(0)"></div>
+        <div class="hit-zone" id="hit2" onclick="openModal(1)"></div>
+        <div class="hit-zone" id="hit3" onclick="openModal(2)"></div>
+    </div>
+
+    <button id="nav-back-btn" onclick="exitGallery()">← Back to Letter</button>
+</div>
+
+<!-- MODAL -->
+<div id="photo-modal" onclick="handleModalBg(event)">
+    <img id="modal-img" src="" alt="Memory">
+    <div id="modal-placeholder">
+        <span>🌸</span>
+        <p id="placeholder-msg"></p>
+    </div>
+    <button class="close-btn" onclick="closeModal()">← Back to Gallery</button>
+    <p id="modal-hint">click outside the photo or press Esc to close</p>
+</div>
+
+<script>
+// ── IMAGE LOADING ──────────────────────────────────────────────
+const imageNames = ['zainab1', 'zainab2', 'zainab3'];
+const exts = ['.jpg', '.jpeg', '.png', '.JPG', '.PNG'];
+
+function tryLoad(imgEl, name, extIdx) {
+    if (extIdx >= exts.length) return;
+    imgEl.src = name + exts[extIdx];
+    imgEl.onerror = () => tryLoad(imgEl, name, extIdx + 1);
+}
+['img1','img2','img3'].forEach((id, i) => tryLoad(document.getElementById(id), imageNames[i], 0));
+
+// ── 3D CARD DEFINITIONS ────────────────────────────────────────
+const PERSP = 1000;
+const IMG_W = 230, IMG_H = 320;
+
+// tx/ty/tz: 3D offset from center; ry: Y rotation
+const cardDefs = [
+    { tx: -340, ty: -260, tz: -200, ry:  15 },
+    { tx:  120, ty: -160, tz: -400, ry: -15 },
+    { tx: -120, ty:  130, tz: -600, ry:  10 },
+];
+const birdDefs = [
+    { tx:  360, ty:  320, tz: -100 },
+    { tx: -580, ty: -300, tz: -300 },
+    { tx:  480, ty: -160, tz: -500 },
+];
+
+// Apply 3D transforms to visual cards
+cardDefs.forEach((d, i) => {
+    document.getElementById('card'+(i+1)).style.transform =
+        `translate(-50%,-50%) translate3d(${d.tx}px,${d.ty}px,${d.tz}px) rotateY(${d.ry}deg)`;
+});
+birdDefs.forEach((d, i) => {
+    document.getElementById('bird'+(i+1)).style.transform =
+        `translate(-50%,-50%) translate3d(${d.tx}px,${d.ty}px,${d.tz}px)`;
+});
+
+// ── PROJECT 3D → 2D for hit zones ─────────────────────────────
+function project(tx, ty, tz) {
+    const scale = PERSP / (PERSP - tz);
+    return {
+        x: innerWidth  / 2 + tx * scale,
+        y: innerHeight / 2 + ty * scale,
+        s: scale
+    };
+}
+
+function updateHitZones() {
+    cardDefs.forEach((d, i) => {
+        const p = project(d.tx, d.ty, d.tz);
+        const w = IMG_W * p.s;
+        const h = IMG_H * p.s;
+        const hit = document.getElementById('hit'+(i+1));
+        hit.style.left   = (p.x - w/2) + 'px';
+        hit.style.top    = (p.y - h/2) + 'px';
+        hit.style.width  = w + 'px';
+        hit.style.height = h + 'px';
+    });
+}
+window.addEventListener('resize', updateHitZones);
+
+// ── PARALLAX ──────────────────────────────────────────────────
+let rotX = 0, rotY = 0;
+let mX = innerWidth/2, mY = innerHeight/2;
+let galleryVisible = false;
+
+document.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; });
+
+(function tick() {
+    if (galleryVisible) {
+        const nx = (mX / innerWidth  - 0.5) * 2;
+        const ny = (mY / innerHeight - 0.5) * 2;
+        rotX += (ny * -6 - rotX) * 0.08;
+        rotY += (nx *  6 - rotY) * 0.08;
+        document.getElementById('gallery-inner').style.transform =
+            `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    }
+    requestAnimationFrame(tick);
+})();
+
+// ── NAVIGATION ────────────────────────────────────────────────
+const introScreen   = document.getElementById('intro-screen');
+const galleryScreen = document.getElementById('gallery-screen');
+
+function enterGallery() {
+    introScreen.style.opacity = '0';
+    setTimeout(() => {
+        introScreen.style.display = 'none';
+        galleryScreen.style.display = 'block';
+        galleryVisible = true;
+        updateHitZones();
+    }, 820);
+}
+
+function exitGallery() {
+    galleryScreen.style.display = 'none';
+    galleryVisible = false;
+    introScreen.style.display = 'flex';
+    setTimeout(() => introScreen.style.opacity = '1', 30);
+}
+
+// ── MODAL ──────────────────────────────────────────────────────
+const modal          = document.getElementById('photo-modal');
+const modalImg       = document.getElementById('modal-img');
+const placeholder    = document.getElementById('modal-placeholder');
+const placeholderMsg = document.getElementById('placeholder-msg');
+
+function openModal(idx) {
+    const src = document.getElementById('img'+(idx+1));
+    const ok  = src.complete && src.naturalWidth > 0;
+
+    if (ok) {
+        modalImg.src = src.src;
+        modalImg.style.display = 'block';
+        placeholder.style.display = 'none';
+    } else {
+        modalImg.style.display = 'none';
+        placeholder.style.display = 'flex';
+        placeholderMsg.innerHTML =
+            `Photo not found.<br>Name your file <strong>${imageNames[idx]}.jpg</strong><br>and place it in the same folder as this HTML file.`;
+    }
+    modal.classList.add('open');
+}
+
+function closeModal() {
+    modal.classList.remove('open');
+    setTimeout(() => { modalImg.src = ''; }, 400);
+}
+
+function handleModalBg(e) {
+    if (e.target === modal) closeModal();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+</script>
+</body>
+</html>

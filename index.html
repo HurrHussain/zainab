@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>For Zainab Khan 🌸</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -20,207 +20,121 @@
             background-color: var(--pink-bg);
             font-family: 'Poppins', sans-serif;
             overflow: hidden;
+            /* Prevents weird mobile scrolling behaviors */
+            overscroll-behavior: none; 
         }
 
         /* ── INTRO SCREEN ── */
         #intro-screen {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 200;
-            transition: opacity 0.8s ease;
+            position: fixed; inset: 0;
+            display: flex; justify-content: center; align-items: center;
+            z-index: 200; transition: opacity 0.8s ease;
+            padding: 20px; /* Safe space for mobile screens */
         }
 
         .text-wall {
-            width: 80%;
-            max-width: 700px;
-            background: rgba(255,255,255,0.75);
+            width: 100%; max-width: 700px;
+            background: rgba(255,255,255,0.8);
             backdrop-filter: blur(12px);
-            padding: 50px;
-            border-radius: 30px;
+            padding: 40px 30px; border-radius: 30px;
             border: 1px solid rgba(255,255,255,0.9);
             box-shadow: 0 25px 50px rgba(190,24,93,0.1);
             text-align: center;
+            max-height: 90vh;
+            overflow-y: auto; /* Allows scrolling if text is too long on small phones */
         }
 
         h1 {
-            font-family: 'Playfair Display', serif;
-            color: var(--pink-text);
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            margin: 0 0 20px;
-            font-style: italic;
+            font-family: 'Playfair Display', serif; color: var(--pink-text);
+            font-size: clamp(2.2rem, 8vw, 3.5rem); /* Scales automatically for mobile */
+            margin: 0 0 15px; font-style: italic;
         }
-        p { color: var(--purple-text); font-size: 1.05rem; line-height: 1.8; margin-bottom: 16px; }
+        
+        p { 
+            color: var(--purple-text); 
+            font-size: clamp(0.95rem, 3vw, 1.1rem); 
+            line-height: 1.7; margin-bottom: 16px; 
+        }
 
         .btn {
             background: var(--pink-text); color: white; border: none;
             padding: 14px 34px; font-size: 1rem; border-radius: 50px;
-            cursor: pointer; font-family: 'Poppins', sans-serif;
+            cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: 600;
             box-shadow: 0 10px 20px rgba(190,24,93,0.25);
             transition: transform 0.2s, background 0.2s;
+            margin-top: 10px;
         }
-        .btn:hover { transform: scale(1.05); background: #9d174d; }
+        /* Mobile touch fix: avoid :hover sticking */
+        @media (hover: hover) { .btn:hover { transform: scale(1.05); background: #9d174d; } }
+        .btn:active { transform: scale(0.95); }
 
         /* ── GALLERY ── */
-        #gallery-screen {
-            position: fixed;
-            inset: 0;
-            display: none;
-            z-index: 100;
-        }
-
-        /* Visual 3D layer — pointer-events OFF so it never blocks clicks */
-        #gallery-3d {
-            position: absolute;
-            inset: 0;
-            perspective: 1000px;
-            pointer-events: none;
-        }
-
-        #gallery-inner {
-            position: absolute;
-            inset: 0;
-            transform-style: preserve-3d;
-        }
-
-        .scene-card {
-            position: absolute;
-            top: 50%; left: 50%;
-        }
+        #gallery-screen { position: fixed; inset: 0; display: none; z-index: 100; }
+        #gallery-3d { position: absolute; inset: 0; perspective: 1000px; }
+        #gallery-inner { position: absolute; inset: 0; transform-style: preserve-3d; }
+        .scene-card { position: absolute; top: 50%; left: 50%; transform-style: preserve-3d; }
 
         .scene-img {
-            width: 230px;
-            height: 320px;
-            object-fit: cover;
-            border-radius: 14px;
-            border: 6px solid white;
+            width: clamp(180px, 45vw, 230px); /* Slightly smaller on phones */
+            height: clamp(250px, 60vw, 320px);
+            object-fit: cover; border-radius: 14px; border: 6px solid white;
             box-shadow: 0 20px 40px rgba(190,24,93,0.2);
-            background: #fbcfe8;
-            display: block;
+            background: #fbcfe8; display: block;
+            cursor: pointer; pointer-events: auto;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        /* Flat click-target overlay */
-        #gallery-hits {
-            position: absolute;
-            inset: 0;
-            pointer-events: none;
+        @media (hover: hover) {
+            .scene-img:hover {
+                transform: scale(1.08); border-color: var(--pink-text);
+                box-shadow: 0 30px 60px rgba(190,24,93,0.4);
+            }
         }
 
-        .hit-zone {
-            position: absolute;
-            cursor: pointer;
-            pointer-events: auto;
-            border-radius: 14px;
-            border: 4px solid transparent;
-            transition: border-color 0.25s, box-shadow 0.25s;
-        }
-        .hit-zone:hover {
-            border-color: var(--pink-text);
-            box-shadow: 0 0 0 4px rgba(219,39,119,0.15);
-        }
-        .hit-zone::after {
-            content: '🔍';
-            position: absolute;
-            bottom: 12px; right: 12px;
-            background: rgba(255,255,255,0.92);
-            border-radius: 50%;
-            width: 36px; height: 36px;
-            font-size: 16px;
-            display: flex; align-items: center; justify-content: center;
-            line-height: 36px; text-align: center;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .hit-zone:hover::after { opacity: 1; }
-
-        .bird {
-            position: absolute;
-            font-size: 3.5rem;
-            pointer-events: none;
-            user-select: none;
-        }
+        .bird { position: absolute; font-size: clamp(2.5rem, 8vw, 3.5rem); pointer-events: none; user-select: none; }
 
         #nav-back-btn {
-            position: absolute; top: 28px; left: 28px;
-            background: white; color: var(--pink-text);
-            border: 2px solid var(--pink-text);
-            padding: 10px 24px; border-radius: 30px;
-            font-weight: 600; cursor: pointer;
-            font-family: 'Poppins', sans-serif;
-            pointer-events: auto;
-            z-index: 10;
-            transition: background 0.2s, color 0.2s;
+            position: absolute; top: 20px; left: 20px; /* Tighter for mobile */
+            background: white; color: var(--pink-text); border: 2px solid var(--pink-text);
+            padding: 8px 20px; border-radius: 30px; font-weight: 600; cursor: pointer;
+            font-family: 'Poppins', sans-serif; pointer-events: auto; z-index: 110;
         }
-        #nav-back-btn:hover { background: var(--pink-text); color: white; }
 
         /* ── MODAL ── */
         #photo-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(253,242,248,0.97);
-            backdrop-filter: blur(18px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.35s ease;
+            position: fixed; inset: 0;
+            background: rgba(253,242,248,0.97); backdrop-filter: blur(15px);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
-        #photo-modal.open {
-            opacity: 1;
-            pointer-events: auto;
-        }
+        #photo-modal.open { opacity: 1; pointer-events: auto; }
 
         #modal-img {
-            max-width: 88vw;
-            max-height: 72vh;
-            object-fit: contain;
-            border-radius: 20px;
-            border: 8px solid white;
-            box-shadow: 0 30px 80px rgba(190,24,93,0.3);
-            margin-bottom: 28px;
-            transform: scale(0.93);
-            transition: transform 0.4s cubic-bezier(0.25,1,0.2,1);
+            max-width: 90vw; max-height: 70vh; /* Better mobile fit */
+            object-fit: contain; border-radius: 15px; border: 6px solid white;
+            box-shadow: 0 30px 60px rgba(190,24,93,0.2); margin-bottom: 20px;
+            transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.25,1,0.2,1);
         }
         #photo-modal.open #modal-img { transform: scale(1); }
 
-        #modal-placeholder {
-            width: 300px; height: 380px;
-            background: #fbcfe8;
-            border-radius: 20px;
-            border: 8px solid white;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 28px;
-            text-align: center;
-            padding: 24px;
-            display: none;
-        }
-        #modal-placeholder span { font-size: 3rem; }
-        #modal-placeholder p { color: var(--pink-text); font-size: 0.9rem; margin-top: 12px; }
-
         .close-btn {
-            background: white; color: var(--pink-text);
-            border: 2px solid var(--pink-text);
-            padding: 12px 30px; border-radius: 50px;
-            font-size: 1rem; font-family: 'Poppins', sans-serif;
-            font-weight: 600; cursor: pointer;
-            transition: background 0.2s, color 0.2s, transform 0.2s;
+            background: white; color: var(--pink-text); border: 2px solid var(--pink-text);
+            padding: 12px 30px; border-radius: 50px; font-size: 1rem; font-weight: 600;
+            cursor: pointer; margin-top: 10px;
         }
-        .close-btn:hover { background: var(--pink-text); color: white; transform: scale(1.05); }
-        #modal-hint { font-size: 0.8rem; color: var(--pink-text); opacity: 0.4; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<!-- INTRO -->
+<svg width="0" height="0" style="position:absolute; z-index:-1;">
+    <filter id="distortion-filter">
+        <feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="1" result="noise" />
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="0" id="displacement" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+</svg>
+
 <div id="intro-screen">
-    <div class="text-wall">
+    <div class="text-wall" id="tear-target">
         <h1>For Zainab Khan 🌸</h1>
         <p>
             It's hard to believe it has already been 4 years since we became friends.
@@ -237,47 +151,30 @@
     </div>
 </div>
 
-<!-- GALLERY -->
 <div id="gallery-screen">
-
-    <!-- Visual-only 3D layer (no pointer events) -->
     <div id="gallery-3d">
         <div id="gallery-inner">
-            <div class="scene-card" id="card1"><img class="scene-img" id="img1" alt=""></div>
-            <div class="scene-card" id="card2"><img class="scene-img" id="img2" alt=""></div>
-            <div class="scene-card" id="card3"><img class="scene-img" id="img3" alt=""></div>
+            <div class="scene-card" id="card1"><img class="scene-img" id="img1" alt="Zainab 1" onclick="openModal(0)"></div>
+            <div class="scene-card" id="card2"><img class="scene-img" id="img2" alt="Zainab 2" onclick="openModal(1)"></div>
+            <div class="scene-card" id="card3"><img class="scene-img" id="img3" alt="Zainab 3" onclick="openModal(2)"></div>
 
             <div class="scene-card bird" id="bird1">🕊️</div>
             <div class="scene-card bird" id="bird2">🐦</div>
             <div class="scene-card bird" id="bird3">🕊️</div>
         </div>
     </div>
-
-    <!-- Flat invisible hit zones positioned over each image -->
-    <div id="gallery-hits">
-        <div class="hit-zone" id="hit1" onclick="openModal(0)"></div>
-        <div class="hit-zone" id="hit2" onclick="openModal(1)"></div>
-        <div class="hit-zone" id="hit3" onclick="openModal(2)"></div>
-    </div>
-
-    <button id="nav-back-btn" onclick="exitGallery()">← Back to Letter</button>
+    <button id="nav-back-btn" onclick="exitGallery()">← Back</button>
 </div>
 
-<!-- MODAL -->
 <div id="photo-modal" onclick="handleModalBg(event)">
     <img id="modal-img" src="" alt="Memory">
-    <div id="modal-placeholder">
-        <span>🌸</span>
-        <p id="placeholder-msg"></p>
-    </div>
-    <button class="close-btn" onclick="closeModal()">← Back to Gallery</button>
-    <p id="modal-hint">click outside the photo or press Esc to close</p>
+    <button class="close-btn" onclick="closeModal()">Close Photo</button>
 </div>
 
 <script>
-// ── IMAGE LOADING ──────────────────────────────────────────────
+// ── SMART IMAGE LOADING ──
 const imageNames = ['zainab1', 'zainab2', 'zainab3'];
-const exts = ['.jpg', '.jpeg', '.png', '.JPG', '.PNG'];
+const exts = ['.jpg', '.jpeg', '.png', '.JPG', '.JPEG'];
 
 function tryLoad(imgEl, name, extIdx) {
     if (extIdx >= exts.length) return;
@@ -286,77 +183,100 @@ function tryLoad(imgEl, name, extIdx) {
 }
 ['img1','img2','img3'].forEach((id, i) => tryLoad(document.getElementById(id), imageNames[i], 0));
 
-// ── 3D CARD DEFINITIONS ────────────────────────────────────────
-const PERSP = 1000;
-const IMG_W = 230, IMG_H = 320;
+// ── RESPONSIVE 3D LAYOUT ──
+const isMobile = window.innerWidth <= 768;
 
-// tx/ty/tz: 3D offset from center; ry: Y rotation
-const cardDefs = [
+// If on mobile, stack them closer together. If desktop, spread them out.
+const cardDefs = isMobile ? [
+    { tx: 0, ty: -180, tz: -100, ry: 5 },
+    { tx: -60, ty: 50, tz: -300, ry: -10 },
+    { tx: 50, ty: 280, tz: -500, ry: 8 }
+] : [
     { tx: -340, ty: -260, tz: -200, ry:  15 },
     { tx:  120, ty: -160, tz: -400, ry: -15 },
-    { tx: -120, ty:  130, tz: -600, ry:  10 },
+    { tx: -120, ty:  130, tz: -600, ry:  10 }
 ];
-const birdDefs = [
+
+const birdDefs = isMobile ? [
+    { tx:  150, ty:  100, tz: -50 },
+    { tx: -180, ty: -100, tz: -200 },
+    { tx:  100, ty: -250, tz: -400 }
+] : [
     { tx:  360, ty:  320, tz: -100 },
     { tx: -580, ty: -300, tz: -300 },
-    { tx:  480, ty: -160, tz: -500 },
+    { tx:  480, ty: -160, tz: -500 }
 ];
 
-// Apply 3D transforms to visual cards
 cardDefs.forEach((d, i) => {
-    document.getElementById('card'+(i+1)).style.transform =
-        `translate(-50%,-50%) translate3d(${d.tx}px,${d.ty}px,${d.tz}px) rotateY(${d.ry}deg)`;
+    document.getElementById('card'+(i+1)).style.transform = `translate(-50%,-50%) translate3d(${d.tx}px,${d.ty}px,${d.tz}px) rotateY(${d.ry}deg)`;
 });
 birdDefs.forEach((d, i) => {
-    document.getElementById('bird'+(i+1)).style.transform =
-        `translate(-50%,-50%) translate3d(${d.tx}px,${d.ty}px,${d.tz}px)`;
+    document.getElementById('bird'+(i+1)).style.transform = `translate(-50%,-50%) translate3d(${d.tx}px,${d.ty}px,${d.tz}px)`;
 });
 
-// ── PROJECT 3D → 2D for hit zones ─────────────────────────────
-function project(tx, ty, tz) {
-    const scale = PERSP / (PERSP - tz);
-    return {
-        x: innerWidth  / 2 + tx * scale,
-        y: innerHeight / 2 + ty * scale,
-        s: scale
-    };
-}
-
-function updateHitZones() {
-    cardDefs.forEach((d, i) => {
-        const p = project(d.tx, d.ty, d.tz);
-        const w = IMG_W * p.s;
-        const h = IMG_H * p.s;
-        const hit = document.getElementById('hit'+(i+1));
-        hit.style.left   = (p.x - w/2) + 'px';
-        hit.style.top    = (p.y - h/2) + 'px';
-        hit.style.width  = w + 'px';
-        hit.style.height = h + 'px';
-    });
-}
-window.addEventListener('resize', updateHitZones);
-
-// ── PARALLAX ──────────────────────────────────────────────────
+// ── MOUSE & TOUCH PARALLAX + TEARING ──
 let rotX = 0, rotY = 0;
 let mX = innerWidth/2, mY = innerHeight/2;
+let lastX = mX, lastY = mY;
 let galleryVisible = false;
 
+// Tearing variables
+const displacement = document.getElementById('displacement');
+const tearTarget = document.getElementById('tear-target');
+let currentTear = 0, targetTear = 0;
+
+// Auto-pan for mobile
+let autoTime = 0;
+
+// Mouse tracking
 document.addEventListener('mousemove', e => { mX = e.clientX; mY = e.clientY; });
 
+// Touch tracking for mobile
+document.addEventListener('touchmove', e => {
+    mX = e.touches[0].clientX;
+    mY = e.touches[0].clientY;
+}, { passive: true });
+
 (function tick() {
-    if (galleryVisible) {
-        const nx = (mX / innerWidth  - 0.5) * 2;
-        const ny = (mY / innerHeight - 0.5) * 2;
-        rotX += (ny * -6 - rotX) * 0.08;
-        rotY += (nx *  6 - rotY) * 0.08;
-        document.getElementById('gallery-inner').style.transform =
-            `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    // 1. Tearing Effect (Only on main screen)
+    if (!galleryVisible) {
+        const speed = Math.sqrt(Math.pow(mX - lastX, 2) + Math.pow(mY - lastY, 2));
+        targetTear = Math.min(speed * 0.8, isMobile ? 40 : 80); // Less tear on mobile to save battery
+        
+        currentTear += (targetTear - currentTear) * 0.15;
+        displacement.setAttribute('scale', currentTear);
+        
+        if (currentTear > 1) {
+            tearTarget.style.filter = 'url(#distortion-filter)';
+        } else {
+            tearTarget.style.filter = 'none'; // Turn off filter when still for better text clarity
+        }
+        targetTear *= 0.5;
     }
+
+    // 2. Parallax Gallery Rotation
+    if (galleryVisible) {
+        if (isMobile && mX === lastX && mY === lastY) {
+            // Auto float if user isn't touching the screen on mobile
+            autoTime += 0.01;
+            rotX = Math.sin(autoTime) * 3;
+            rotY = Math.cos(autoTime) * 3;
+        } else {
+            const nx = (mX / innerWidth  - 0.5) * 2;
+            const ny = (mY / innerHeight - 0.5) * 2;
+            const intensity = isMobile ? 3 : 6;
+            rotX += (ny * -intensity - rotX) * 0.08;
+            rotY += (nx * intensity - rotY) * 0.08;
+        }
+        document.getElementById('gallery-inner').style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    }
+
+    lastX = mX; lastY = mY;
     requestAnimationFrame(tick);
 })();
 
-// ── NAVIGATION ────────────────────────────────────────────────
-const introScreen   = document.getElementById('intro-screen');
+// ── NAVIGATION ──
+const introScreen = document.getElementById('intro-screen');
 const galleryScreen = document.getElementById('gallery-screen');
 
 function enterGallery() {
@@ -365,8 +285,7 @@ function enterGallery() {
         introScreen.style.display = 'none';
         galleryScreen.style.display = 'block';
         galleryVisible = true;
-        updateHitZones();
-    }, 820);
+    }, 500);
 }
 
 function exitGallery() {
@@ -376,39 +295,24 @@ function exitGallery() {
     setTimeout(() => introScreen.style.opacity = '1', 30);
 }
 
-// ── MODAL ──────────────────────────────────────────────────────
-const modal          = document.getElementById('photo-modal');
-const modalImg       = document.getElementById('modal-img');
-const placeholder    = document.getElementById('modal-placeholder');
-const placeholderMsg = document.getElementById('placeholder-msg');
+// ── MODAL ──
+const modal = document.getElementById('photo-modal');
+const modalImg = document.getElementById('modal-img');
 
 function openModal(idx) {
     const src = document.getElementById('img'+(idx+1));
-    const ok  = src.complete && src.naturalWidth > 0;
-
-    if (ok) {
+    if (src.complete && src.naturalWidth > 0) {
         modalImg.src = src.src;
-        modalImg.style.display = 'block';
-        placeholder.style.display = 'none';
-    } else {
-        modalImg.style.display = 'none';
-        placeholder.style.display = 'flex';
-        placeholderMsg.innerHTML =
-            `Photo not found.<br>Name your file <strong>${imageNames[idx]}.jpg</strong><br>and place it in the same folder as this HTML file.`;
+        modal.classList.add('open');
     }
-    modal.classList.add('open');
 }
 
 function closeModal() {
     modal.classList.remove('open');
-    setTimeout(() => { modalImg.src = ''; }, 400);
+    setTimeout(() => { modalImg.src = ''; }, 300);
 }
 
-function handleModalBg(e) {
-    if (e.target === modal) closeModal();
-}
-
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+function handleModalBg(e) { if (e.target === modal) closeModal(); }
 </script>
 </body>
 </html>
